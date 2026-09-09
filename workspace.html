@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Workspace — Biswarup AI Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--ease:cubic-bezier(.16,1,.3,1);--radius-s:8px;--radius-m:14px;--radius-l:20px;}
+html[data-theme="dark"]{
+  --bg:#0B0C10;--bg-soft:#111319;--surface:#181B22;--surface-2:#20242D;
+  --border:#282C36;--border-soft:#20232B;--text:#F3F2EE;--text-dim:#9A9DA8;--text-faint:#5C606C;
+  --accent:#F0B25B;--accent-strong:#FFC97A;--accent-soft:rgba(240,178,91,.13);
+  --good:#5FD3A5;--good-soft:rgba(95,211,165,.13);
+  --blue:#6B9FFF;--blue-soft:rgba(107,159,255,.13);
+  --purple:#B67DFF;--purple-soft:rgba(182,125,255,.13);
+}
+html[data-theme="light"]{
+  --bg:#F7F6F2;--bg-soft:#FFF;--surface:#FFF;--surface-2:#F1EFE8;
+  --border:#E4E1D6;--border-soft:#ECEAE0;--text:#15161A;--text-dim:#5C5F68;--text-faint:#8B8E97;
+  --accent:#B9711A;--accent-strong:#96590F;--accent-soft:rgba(185,113,26,.10);
+  --good:#188A5E;--good-soft:rgba(24,138,94,.10);
+  --blue:#2460D6;--blue-soft:rgba(36,96,214,.10);
+  --purple:#7B3FCC;--purple-soft:rgba(123,63,204,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:-.01em;}
+a{color:inherit;text-decoration:none;}button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,textarea{font-family:inherit;}
+.mono{font-family:'JetBrains Mono',monospace;}
+
+/* ---- TOP BAR ---- */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:56px;border-bottom:1px solid var(--border-soft);background:var(--bg-soft);flex:none;gap:12px;}
+.brand{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk';font-weight:600;font-size:15px;flex:none;}
+.brand-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(155deg,var(--accent-strong),var(--accent) 65%);position:relative;flex:none;}
+.brand-mark::after{content:"";position:absolute;inset:5px;border-radius:3px;background:var(--bg-soft);clip-path:polygon(0 0,100% 0,100% 45%,45% 45%,45% 100%,0 100%);}
+.topbar-center{display:flex;align-items:center;gap:8px;flex:1;justify-content:center;}
+.model-select{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:7px 14px;font-size:13px;cursor:pointer;max-width:260px;}
+.model-select .dot-active{width:7px;height:7px;border-radius:50%;background:var(--good);flex:none;}
+.model-select svg{color:var(--text-faint);}
+.topbar-right{display:flex;align-items:center;gap:10px;flex:none;}
+.usage-pill{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:6px 12px;font-size:12px;}
+.usage-bar{width:70px;height:4px;border-radius:99px;background:var(--surface-2);overflow:hidden;}
+.usage-bar i{display:block;height:100%;background:var(--accent);border-radius:99px;}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent-strong),var(--accent));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#181206;cursor:pointer;}
+.topbar .btn{padding:7px 14px;border-radius:99px;font-weight:600;font-size:12.5px;background:linear-gradient(155deg,var(--accent-strong),var(--accent) 70%);color:#181206;display:inline-flex;align-items:center;}
+.theme-switch{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:2px;gap:1px;}
+.theme-switch button{padding:5px 7px;border-radius:99px;font-size:11px;color:var(--text-faint);}
+.theme-switch button.active{background:var(--surface-2);color:var(--text);}
+.hamburger-btn{width:34px;height:34px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:none;align-items:center;justify-content:center;}
+
+/* ---- LAYOUT ---- */
+.layout{display:flex;flex:1;overflow:hidden;}
+
+/* ---- SIDEBAR ---- */
+.sidebar{width:220px;flex:none;border-right:1px solid var(--border-soft);background:var(--bg-soft);display:flex;flex-direction:column;overflow-y:auto;transition:transform .3s var(--ease);}
+.sidebar-section{padding:10px 8px;}
+.sidebar-grp{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);padding:12px 12px 6px;}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-s);font-size:13px;color:var(--text-dim);cursor:pointer;transition:background .15s,color .15s;}
+.sidebar-item:hover{background:var(--surface);color:var(--text);}
+.sidebar-item.active{background:var(--accent-soft);color:var(--accent);}
+.sidebar-item .icon{width:20px;text-align:center;flex:none;font-size:14px;}
+.sidebar-item .badge{margin-left:auto;font-size:10px;background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:99px;font-family:'JetBrains Mono';}
+.sidebar-new{margin:10px 8px;padding:10px 14px;border-radius:var(--radius-s);background:var(--accent-soft);border:1px solid rgba(240,178,91,.25);color:var(--accent);font-size:13px;font-weight:600;text-align:center;width:calc(100% - 16px);}
+.sidebar-new:hover{background:var(--accent);color:#181206;}
+
+/* ---- MAIN CONTENT ---- */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+
+/* ---- DASHBOARD VIEW ---- */
+.dash{padding:24px;overflow-y:auto;flex:1;display:none;}
+.dash.active{display:block;}
+.welcome{margin-bottom:24px;}
+.welcome h2{font-size:22px;}
+.welcome p{color:var(--text-dim);font-size:13.5px;margin-top:4px;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;}
+.stat-card .label{font-size:11.5px;color:var(--text-faint);margin-bottom:6px;}
+.stat-card .val{font-family:'Space Grotesk';font-size:22px;font-weight:600;}
+.stat-card .sub{font-size:11px;color:var(--text-faint);margin-top:2px;}
+.stat-card.accent{background:var(--accent-soft);border-color:transparent;}
+.stat-card.accent .val{color:var(--accent);}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.dash-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;}
+.dash-box h4{font-size:13.5px;margin-bottom:14px;}
+.recent-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-soft);}
+.recent-row:last-child{border-bottom:none;}
+.recent-icon{width:32px;height:32px;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:13px;flex:none;}
+.recent-row h5{font-size:12.5px;}
+.recent-row span{font-size:11px;color:var(--text-faint);}
+.tool-chip{display:inline-flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:8px;padding:8px 12px;font-size:12.5px;cursor:pointer;margin:0 6px 6px 0;}
+.tool-chip:hover{border-color:var(--text-faint);}
+.dash-upgrade{background:linear-gradient(135deg,var(--accent-soft),transparent);border:1px solid rgba(240,178,91,.3);border-radius:var(--radius-m);padding:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap;}
+.dash-upgrade p{font-size:13px;color:var(--text-dim);max-width:340px;}
+.upgrade-btn{padding:9px 18px;border-radius:99px;background:linear-gradient(155deg,var(--accent-strong),var(--accent) 70%);color:#181206;font-weight:600;font-size:13px;}
+
+/* ---- CHAT VIEW ---- */
+.chat-view{flex:1;display:none;flex-direction:column;overflow:hidden;}
+.chat-view.active{display:flex;}
+.chat-messages{flex:1;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:16px;}
+.msg{display:flex;gap:10px;max-width:720px;}
+.msg.me{align-self:flex-end;flex-direction:row-reverse;}
+.msg-avatar{width:28px;height:28px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:11px;flex:none;margin-top:2px;}
+.msg.me .msg-avatar{background:linear-gradient(135deg,var(--accent-strong),var(--accent));color:#181206;font-weight:700;}
+.bubble{padding:12px 16px;border-radius:14px;font-size:13.5px;line-height:1.6;background:var(--surface);border:1px solid var(--border-soft);max-width:100%;}
+.msg.me .bubble{background:var(--accent-soft);border-color:transparent;}
+.typing-indicator{display:flex;gap:4px;padding:12px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--border-soft);align-items:center;}
+.typing-indicator i{width:6px;height:6px;border-radius:50%;background:var(--text-faint);animation:pulse 1.2s infinite ease-in-out;}
+.typing-indicator i:nth-child(2){animation-delay:.2s;}.typing-indicator i:nth-child(3){animation-delay:.4s;}
+@keyframes pulse{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.msg-time{font-size:10.5px;color:var(--text-faint);margin-top:4px;text-align:right;}
+.msg.me .msg-time{text-align:right;}
+
+.chat-input-area{padding:14px 22px;border-top:1px solid var(--border-soft);background:var(--bg-soft);}
+.chat-input-box{display:flex;align-items:flex-end;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:12px 14px;}
+.chat-input-box:focus-within{border-color:var(--accent);}
+.chat-input-box textarea{flex:1;background:none;border:none;outline:none;resize:none;color:var(--text);font-size:14px;max-height:130px;line-height:1.5;}
+.chat-input-box textarea::placeholder{color:var(--text-faint);}
+.input-actions{display:flex;align-items:center;gap:8px;flex:none;}
+.ic-btn{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-faint);}
+.ic-btn:hover{background:var(--surface-2);color:var(--text);}
+.send-btn{width:36px;height:36px;border-radius:9px;background:linear-gradient(155deg,var(--accent-strong),var(--accent) 70%);color:#181206;display:flex;align-items:center;justify-content:center;}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;}
+.chat-hint{font-size:11.5px;color:var(--text-faint);text-align:center;margin-top:8px;}
+
+/* ---- HISTORY VIEW ---- */
+.hist-view{flex:1;padding:22px;overflow-y:auto;display:none;}
+.hist-view.active{display:block;}
+.hist-search{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:18px;}
+.hist-search input{background:none;border:none;outline:none;color:var(--text);font-size:13.5px;flex:1;}
+.hist-row{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);margin-bottom:10px;cursor:pointer;}
+.hist-row:hover{border-color:var(--text-faint);}
+.hist-row .ico{width:36px;height:36px;border-radius:9px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;flex:none;}
+.hist-row .fi{flex:1;min-width:0;}
+.hist-row .fi h5{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hist-row .fi span{font-size:11px;color:var(--text-faint);}
+.hist-row .credits{font-size:11px;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:99px;flex:none;font-family:'JetBrains Mono';}
+.hist-row .del{color:var(--text-faint);padding:4px;border-radius:6px;}
+.hist-row .del:hover{color:#e55;background:rgba(229,85,85,.1);}
+
+/* ---- PROJECTS VIEW ---- */
+.proj-view{flex:1;padding:22px;overflow-y:auto;display:none;}
+.proj-view.active{display:block;}
+.proj-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.proj-header h3{font-size:18px;}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.proj-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;cursor:pointer;}
+.proj-card:hover{border-color:var(--text-faint);}
+.proj-card .icon{font-size:22px;margin-bottom:12px;}
+.proj-card h4{font-size:13.5px;margin-bottom:4px;}
+.proj-card p{font-size:12px;color:var(--text-faint);}
+.proj-new{border-style:dashed;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:110px;color:var(--text-faint);}
+.proj-new:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ---- FAVORITES VIEW ---- */
+.fav-view{flex:1;padding:22px;overflow-y:auto;display:none;}
+.fav-view.active{display:block;}
+.fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
+.fav-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:14px;display:flex;gap:10px;align-items:flex-start;cursor:pointer;}
+.fav-card:hover{border-color:var(--accent);}
+.fav-card .icon{width:36px;height:36px;border-radius:9px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none;}
+.fav-card h4{font-size:13px;}
+.fav-card p{font-size:11.5px;color:var(--text-faint);}
+
+/* ---- SETTINGS VIEW ---- */
+.settings-view{flex:1;padding:22px;overflow-y:auto;display:none;max-width:640px;}
+.settings-view.active{display:block;}
+.setting-section{margin-bottom:26px;}
+.setting-section h4{font-size:14px;margin-bottom:14px;color:var(--text-dim);}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border-soft);}
+.setting-row:last-child{border-bottom:none;}
+.setting-row .info h5{font-size:13.5px;}
+.setting-row .info p{font-size:12px;color:var(--text-faint);margin-top:2px;}
+.toggle{width:40px;height:22px;border-radius:99px;background:var(--surface-2);border:1.5px solid var(--border);position:relative;cursor:pointer;transition:background .2s;}
+.toggle.on{background:var(--good);}
+.toggle::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;}
+.toggle.on::after{transform:translateX(18px);}
+
+/* ---- BILLING VIEW ---- */
+.bill-view{flex:1;padding:22px;overflow-y:auto;display:none;max-width:680px;}
+.bill-view.active{display:block;}
+.plan-banner{background:var(--accent-soft);border:1px solid rgba(240,178,91,.3);border-radius:var(--radius-m);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+.plan-banner h3{font-size:16px;}
+.plan-banner p{font-size:12.5px;color:var(--text-dim);margin-top:3px;}
+.payment-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border-soft);}
+.payment-row:last-child{border-bottom:none;}
+
+/* ---- BOTTOM NAV (mobile) ---- */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg-soft);border-top:1px solid var(--border-soft);padding:8px 0;z-index:40;}
+.bottom-nav-inner{display:flex;justify-content:space-around;}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--text-faint);padding:4px 12px;border-radius:10px;}
+.bn-item.active{color:var(--accent);}
+.bn-item svg{opacity:.7;}
+.bn-item.active svg{opacity:1;}
+
+/* ---- MODEL DROPDOWN ---- */
+.model-dropdown{position:fixed;top:66px;left:50%;transform:translateX(-50%);background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius-m);box-shadow:0 12px 40px rgba(0,0,0,.35);min-width:280px;z-index:50;display:none;padding:8px;}
+.model-dropdown.open{display:block;}
+.model-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;}
+.model-item:hover{background:var(--surface-2);}
+.model-item.active{background:var(--accent-soft);}
+.model-item .mi-name{font-size:13px;font-weight:500;}
+.model-item .mi-plan{font-size:10.5px;color:var(--text-faint);background:var(--surface-2);padding:1px 6px;border-radius:99px;margin-left:auto;font-family:'JetBrains Mono';}
+
+/* ---- TOAST ---- */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);box-shadow:0 12px 40px rgba(0,0,0,.35);padding:12px 18px;border-radius:12px;font-size:13px;z-index:99;opacity:0;pointer-events:none;transition:all .25s var(--ease);display:flex;align-items:center;gap:10px;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast .dot{width:7px;height:7px;border-radius:50%;background:var(--good);flex:none;}
+
+/* ---- SIDEBAR OVERLAY (mobile) ---- */
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:39;display:none;}
+.sidebar-overlay.show{display:block;}
+
+/* ---- RESPONSIVE ---- */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:56px;bottom:0;z-index:40;transform:translateX(-100%);width:240px;}
+  .sidebar.open{transform:translateX(0);}
+  .hamburger-btn{display:flex;}
+  .topbar-center{display:none;}
+  .usage-pill{display:none;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .dash-grid{grid-template-columns:1fr;}
+  .bottom-nav{display:block;}
+  .main{padding-bottom:65px;}
+}
+@media(max-width:480px){
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .topbar{padding:0 12px;}
+  .brand span{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button class="hamburger-btn" id="hamBtn">☰</button>
+    <a href="index.html" class="brand"><div class="brand-mark"></div><span>Biswarup AI</span></a>
+  </div>
+  <div class="topbar-center">
+    <button class="model-select" id="modelSelectBtn">
+      <span class="dot-active"></span>
+      <span id="modelName">Biswarup Chat — Free</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="topbar-right">
+    <div class="theme-switch" id="themeSwitch">
+      <button data-mode="light">☀</button>
+      <button data-mode="dark">☾</button>
+      <button data-mode="system">⧉</button>
+    </div>
+    <div class="usage-pill">
+      <span class="mono" style="font-size:11px;color:var(--text-faint)">Credits</span>
+      <div class="usage-bar"><i style="width:35%"></i></div>
+      <span class="mono" style="font-size:11px;">18/50</span>
+    </div>
+    <button class="btn" onclick="goView('billing')">Upgrade</button>
+    <div class="avatar" title="Biswarup Patra">B</div>
+  </div>
+</div>
+
+<!-- MODEL DROPDOWN -->
+<div class="model-dropdown" id="modelDropdown">
+  <div style="padding:4px 10px 10px;font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;">Select model</div>
+  <div class="model-item active" data-model="Biswarup Chat — Free"><span class="dot-active" style="width:7px;height:7px;border-radius:50%;background:var(--good);flex:none;"></span><div><div class="mi-name">Biswarup Chat</div></div><span class="mi-plan">Free</span></div>
+  <div class="model-item" data-model="Smart Writer — Free"><span style="width:7px;height:7px;border-radius:50%;background:var(--blue);flex:none;"></span><div><div class="mi-name">Smart Writer</div></div><span class="mi-plan">Free</span></div>
+  <div class="model-item" data-model="Image Studio — Beta" style="opacity:.6;"><span style="width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;"></span><div><div class="mi-name">Image Studio</div></div><span class="mi-plan">Beta</span></div>
+  <div class="model-item" data-model="Pro Reasoner — Pro" style="opacity:.45;cursor:not-allowed;"><span style="width:7px;height:7px;border-radius:50%;background:var(--purple);flex:none;"></span><div><div class="mi-name">Pro Reasoner</div><div style="font-size:10.5px;color:var(--text-faint);">Requires AI Pro</div></div><span class="mi-plan">Pro</span></div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <button class="sidebar-new" onclick="newChat()">＋ New Chat</button>
+      <div class="sidebar-grp">Workspace</div>
+      <div class="sidebar-item active" data-view="dashboard"><span class="icon">◆</span> Dashboard</div>
+      <div class="sidebar-item" data-view="chat"><span class="icon">💬</span> AI Chat</div>
+      <div class="sidebar-item" data-view="chat"><span class="icon">✎</span> Writing</div>
+      <div class="sidebar-item" data-view="chat"><span class="icon">▣</span> Image <span class="badge">Beta</span></div>
+      <div class="sidebar-item" data-view="chat"><span class="icon">▶</span> Video <span class="badge">Soon</span></div>
+      <div class="sidebar-item" data-view="chat"><span class="icon">♪</span> Audio <span class="badge">Soon</span></div>
+      <div class="sidebar-item" data-view="chat"><span class="icon">{ }</span> Coding</div>
+      <div class="sidebar-grp">Library</div>
+      <div class="sidebar-item" data-view="history"><span class="icon">◷</span> History</div>
+      <div class="sidebar-item" data-view="favorites"><span class="icon">♥</span> Favorites</div>
+      <div class="sidebar-item" data-view="projects"><span class="icon">▤</span> Projects</div>
+      <div class="sidebar-grp">Account</div>
+      <div class="sidebar-item" data-view="billing"><span class="icon">💳</span> Billing</div>
+      <div class="sidebar-item" data-view="settings"><span class="icon">⚙</span> Settings</div>
+      <div class="sidebar-item" onclick="window.location.href='index.html'"><span class="icon">↩</span> Back to site</div>
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main" id="main">
+    <!-- DASHBOARD -->
+    <div class="dash active" id="v-dashboard">
+      <div class="welcome">
+        <h2>Good to see you, Biswarup 👋</h2>
+        <p>Here's a snapshot of your workspace.</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card accent">
+          <div class="label">Plan</div>
+          <div class="val" style="font-size:17px;">Free</div>
+          <div class="sub">18 / 50 credits used</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">AI Generations</div>
+          <div class="val">28</div>
+          <div class="sub">This month</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Projects</div>
+          <div class="val">3</div>
+          <div class="sub">Active</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Favorites</div>
+          <div class="val">6</div>
+          <div class="sub">Tools saved</div>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-box">
+          <h4>Continue creating</h4>
+          <div class="recent-row">
+            <div class="recent-icon">💬</div>
+            <div><h5>YouTube caption ideas</h5><span>AI Chat · 2 hours ago</span></div>
+          </div>
+          <div class="recent-row">
+            <div class="recent-icon">✎</div>
+            <div><h5>Blog intro paragraph</h5><span>Writing · Yesterday</span></div>
+          </div>
+          <div class="recent-row">
+            <div class="recent-icon">{ }</div>
+            <div><h5>Python data script</h5><span>Coding · 2 days ago</span></div>
+          </div>
+        </div>
+        <div class="dash-box">
+          <h4>Quick launch</h4>
+          <div>
+            <button class="tool-chip" onclick="goView('chat')">💬 AI Chat</button>
+            <button class="tool-chip" onclick="goView('chat')">✎ Smart Writer</button>
+            <button class="tool-chip" onclick="goView('chat')">{ } Coding</button>
+            <button class="tool-chip" onclick="goView('chat')">▣ Image</button>
+          </div>
+        </div>
+      </div>
+      <div class="dash-upgrade">
+        <div>
+          <h4 style="font-size:14.5px;">Unlock more power</h4>
+          <p>Upgrade to AI Pro for higher limits, mid-range models and full history access.</p>
+        </div>
+        <button class="upgrade-btn" onclick="goView('billing')">Upgrade Now →</button>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="chat-view" id="v-chat">
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg">
+          <div class="msg-avatar">B</div>
+          <div>
+            <div class="bubble">Hello! I'm your AI assistant. What would you like to create today?</div>
+            <div class="msg-time">Now</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="chat-input-box">
+          <textarea id="chatInput" placeholder="Ask anything — write, code, brainstorm, analyze…" rows="1" oninput="autoResize(this)"></textarea>
+          <div class="input-actions">
+            <button class="ic-btn" title="Upload file">📎</button>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <p class="chat-hint">Biswarup Chat (Free) · 32 credits remaining · <a href="#" onclick="goView('billing')" style="color:var(--accent)">Upgrade for more</a></p>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="hist-view" id="v-history">
+      <h3 style="font-size:18px;margin-bottom:16px;">Activity History</h3>
+      <div class="hist-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input placeholder="Search history…">
+      </div>
+      <div id="histList"></div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="proj-view" id="v-projects">
+      <div class="proj-header">
+        <h3>Projects</h3>
+        <button class="upgrade-btn" style="font-size:13px;" onclick="toast('Create project — coming in Phase 2!')">+ New Project</button>
+      </div>
+      <div class="proj-grid">
+        <div class="proj-card">
+          <div class="icon">📺</div>
+          <h4>YouTube Channel</h4>
+          <p>12 files · Updated today</p>
+        </div>
+        <div class="proj-card">
+          <div class="icon">📝</div>
+          <h4>Blog Posts</h4>
+          <p>8 drafts · Updated 3 days ago</p>
+        </div>
+        <div class="proj-card">
+          <div class="icon">💻</div>
+          <h4>Portfolio Code</h4>
+          <p>5 scripts · Updated last week</p>
+        </div>
+        <div class="proj-card proj-new">
+          <div style="font-size:24px;margin-bottom:8px;">＋</div>
+          <div style="font-size:12.5px;">New Project</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAVORITES -->
+    <div class="fav-view" id="v-favorites">
+      <h3 style="font-size:18px;margin-bottom:16px;">My AI Tools</h3>
+      <div class="fav-grid" id="favGrid"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="settings-view" id="v-settings">
+      <h3 style="font-size:18px;margin-bottom:22px;">Settings</h3>
+      <div class="setting-section">
+        <h4>Appearance</h4>
+        <div class="setting-row"><div class="info"><h5>Theme</h5><p>Choose light, dark or system default</p></div><div class="theme-switch" id="themeSwitch2" style="margin:0;"></div></div>
+      </div>
+      <div class="setting-section">
+        <h4>Notifications</h4>
+        <div class="setting-row"><div class="info"><h5>New feature emails</h5><p>Get notified when new tools or features launch</p></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="setting-row"><div class="info"><h5>Usage alerts</h5><p>Alert when credits reach 20%</p></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="setting-row"><div class="info"><h5>Payment confirmations</h5><p>Email when a payment is verified</p></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+      <div class="setting-section">
+        <h4>Profile</h4>
+        <div class="setting-row"><div class="info"><h5>Name</h5><p>Biswarup Patra</p></div><button style="font-size:12px;color:var(--accent);">Edit</button></div>
+        <div class="setting-row"><div class="info"><h5>Email</h5><p>biswarup@email.com</p></div><button style="font-size:12px;color:var(--accent);">Change</button></div>
+        <div class="setting-row"><div class="info"><h5>Password</h5><p>Last changed 30 days ago</p></div><button style="font-size:12px;color:var(--accent);">Reset</button></div>
+      </div>
+      <div class="setting-section">
+        <h4>Danger Zone</h4>
+        <div class="setting-row"><div class="info"><h5>Delete account</h5><p>Permanently remove all data</p></div><button style="font-size:12px;color:#e55;">Delete</button></div>
+      </div>
+    </div>
+
+    <!-- BILLING -->
+    <div class="bill-view" id="v-billing">
+      <h3 style="font-size:18px;margin-bottom:18px;">Billing & Plans</h3>
+      <div class="plan-banner">
+        <div><h3>Free Plan</h3><p>50 credits/month · Basic models only</p></div>
+        <button class="upgrade-btn" id="billUpgradeBtn">Upgrade Plan</button>
+      </div>
+      <h4 style="font-size:13px;color:var(--text-faint);margin-bottom:12px;">Payment History</h4>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;">
+        <div class="payment-row"><span style="font-size:13px;color:var(--text-faint);">No payments yet.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (mobile) -->
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <div class="bn-item active" onclick="goView('dashboard')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="13" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>Home</div>
+    <div class="bn-item" onclick="goView('chat')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z" stroke="currentColor" stroke-width="1.8"/></svg>Chat</div>
+    <div class="bn-item" onclick="goView('history')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>History</div>
+    <div class="bn-item" onclick="goView('favorites')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.7a5.5 5.5 0 0 0 0-7.8z" stroke="currentColor" stroke-width="1.8"/></svg>Saved</div>
+    <div class="bn-item" onclick="goView('settings')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="1.8"/></svg>Settings</div>
+  </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
+
+<script>
+/* theme */
+const root=document.documentElement;
+let themeMode='system';
+const mq=window.matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(){
+  const r=themeMode==='system'?(mq.matches?'dark':'light'):themeMode;
+  root.setAttribute('data-theme',r);
+  document.querySelectorAll('.theme-switch button').forEach(b=>b.classList.toggle('active',b.dataset.mode===themeMode));
+}
+[document.getElementById('themeSwitch')].forEach(sw=>{
+  if(!sw)return;
+  sw.innerHTML=`<button data-mode="light">☀</button><button data-mode="dark">☾</button><button data-mode="system">⧉</button>`;
+  sw.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{themeMode=b.dataset.mode;applyTheme();}));
+});
+const ts2=document.getElementById('themeSwitch2');
+if(ts2){ts2.innerHTML=`<button data-mode="light">☀</button><button data-mode="dark">☾</button><button data-mode="system">⧉</button>`;ts2.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{themeMode=b.dataset.mode;applyTheme();}));}
+mq.addEventListener('change',()=>{if(themeMode==='system')applyTheme();});
+applyTheme();
+
+/* toast */
+let tTimer;
+function toast(msg){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(tTimer);tTimer=setTimeout(()=>t.classList.remove('show'),3200);}
+
+/* views */
+const views=['dashboard','chat','history','projects','favorites','settings','billing'];
+function goView(v){
+  views.forEach(id=>{
+    const el=document.getElementById('v-'+id);
+    if(el)el.classList.toggle('active',id===v);
+  });
+  document.querySelectorAll('.sidebar-item').forEach(el=>el.classList.toggle('active',el.dataset.view===v));
+  document.querySelectorAll('.bn-item').forEach((el,i)=>{
+    const map=['dashboard','chat','history','favorites','settings'];
+    el.classList.toggle('active',map[i]===v);
+  });
+  closeSidebar();
+}
+document.querySelectorAll('.sidebar-item[data-view]').forEach(el=>{
+  el.addEventListener('click',()=>goView(el.dataset.view));
+});
+
+/* hamburger */
+const sidebar=document.getElementById('sidebar');
+const overlay=document.getElementById('sidebarOverlay');
+function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('show');}
+document.getElementById('hamBtn').addEventListener('click',()=>{sidebar.classList.toggle('open');overlay.classList.toggle('show');});
+overlay.addEventListener('click',closeSidebar);
+
+/* model dropdown */
+document.getElementById('modelSelectBtn').addEventListener('click',()=>{
+  document.getElementById('modelDropdown').classList.toggle('open');
+});
+document.querySelectorAll('.model-item').forEach(mi=>{
+  mi.addEventListener('click',()=>{
+    if(mi.style.cursor==='not-allowed'){toast('This model requires AI Pro — upgrade to unlock it.');return;}
+    document.querySelectorAll('.model-item').forEach(x=>x.classList.remove('active'));
+    mi.classList.add('active');
+    document.getElementById('modelName').textContent=mi.dataset.model;
+    document.getElementById('modelDropdown').classList.remove('open');
+  });
+});
+document.addEventListener('click',e=>{if(!e.target.closest('#modelSelectBtn')&&!e.target.closest('#modelDropdown'))document.getElementById('modelDropdown').classList.remove('open');});
+
+/* chat */
+function autoResize(ta){ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,130)+'px';}
+document.getElementById('chatInput').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+
+const sampleReplies=[
+  'Great question! Let me help you with that. Here\'s what I found based on your request…',
+  'Sure! Here\'s a draft you can build on. Let me know if you\'d like a different tone or length.',
+  'I\'ve analyzed your input. Here are 3 variations — pick the one that fits best.',
+  'Done! I\'ve also included a quick tip at the end that might save you time.',
+];
+let msgCount=0;
+function sendMessage(){
+  const input=document.getElementById('chatInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  input.value='';input.style.height='auto';
+  const container=document.getElementById('chatMessages');
+  const now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  container.innerHTML+=`<div class="msg me"><div class="msg-avatar">B</div><div><div class="bubble">${msg}</div><div class="msg-time">${now}</div></div></div>`;
+  container.innerHTML+=`<div class="msg" id="typing-ind"><div class="msg-avatar">A</div><div class="typing-indicator"><i></i><i></i><i></i></div></div>`;
+  container.scrollTop=container.scrollHeight;
+  setTimeout(()=>{
+    const t=document.getElementById('typing-ind');if(t)t.remove();
+    const reply=sampleReplies[msgCount%sampleReplies.length];msgCount++;
+    container.innerHTML+=`<div class="msg"><div class="msg-avatar">A</div><div><div class="bubble">${reply}</div><div class="msg-time">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div></div>`;
+    container.scrollTop=container.scrollHeight;
+  },1400);
+}
+
+function newChat(){
+  document.getElementById('chatMessages').innerHTML=`<div class="msg"><div class="msg-avatar">A</div><div><div class="bubble">New chat started! What would you like to create today?</div><div class="msg-time">Now</div></div></div>`;
+  goView('chat');toast('New chat started.');
+}
+
+/* history */
+const histData=[
+  {icon:'💬',title:'YouTube caption ideas',tool:'AI Chat',date:'2 hours ago',credits:'3c'},
+  {icon:'✎',title:'Blog intro paragraph',tool:'Smart Writer',date:'Yesterday',credits:'2c'},
+  {icon:'{ }',title:'Python data processing script',tool:'Coding',date:'2 days ago',credits:'4c'},
+  {icon:'💬',title:'Instagram bio rewrite',tool:'AI Chat',date:'3 days ago',credits:'2c'},
+];
+document.getElementById('histList').innerHTML=histData.map((h,i)=>`
+  <div class="hist-row">
+    <div class="ico">${h.icon}</div>
+    <div class="fi"><h5>${h.title}</h5><span>${h.tool} · ${h.date}</span></div>
+    <span class="credits mono">${h.credits}</span>
+    <button class="del" onclick="removeHist(${i},this.closest('.hist-row'))">✕</button>
+  </div>`).join('');
+function removeHist(i,el){el.style.opacity='0';setTimeout(()=>el.remove(),250);toast('Entry removed from history.');}
+
+/* favorites */
+const favTools=[
+  {icon:'💬',name:'ChatGPT',cat:'AI Chat'},
+  {icon:'🔍',name:'Perplexity',cat:'AI Search'},
+  {icon:'🎨',name:'Midjourney',cat:'AI Image'},
+  {icon:'✎',name:'Smart Writer',cat:'AI Writing'},
+  {icon:'🎵',name:'Suno',cat:'AI Music'},
+  {icon:'🎬',name:'Runway',cat:'AI Video'},
+];
+document.getElementById('favGrid').innerHTML=favTools.map(f=>`
+  <div class="fav-card" onclick="toast('Opening ${f.name}…')">
+    <div class="icon">${f.icon}</div>
+    <div><h4>${f.name}</h4><p>${f.cat}</p></div>
+  </div>`).join('');
+
+/* billing upgrade button → show UPI modal note */
+document.getElementById('billUpgradeBtn').addEventListener('click',()=>{
+  window.location.href='index.html#pricing';
+});
+</script>
+</body>
+</html>
