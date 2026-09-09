@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Biswarup AI Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--ease:cubic-bezier(.16,1,.3,1);}
+html[data-theme="dark"]{
+  --bg:#090A0D;--bg-soft:#0F1117;--surface:#161920;--surface-2:#1D2029;
+  --border:#23262F;--border-soft:#1C1F27;--text:#F3F2EE;--text-dim:#9A9DA8;--text-faint:#5C606C;
+  --accent:#F0B25B;--accent-strong:#FFC97A;--accent-soft:rgba(240,178,91,.12);
+  --good:#5FD3A5;--good-soft:rgba(95,211,165,.12);
+  --bad:#E56060;--bad-soft:rgba(229,96,96,.12);
+  --blue:#6B9FFF;--blue-soft:rgba(107,159,255,.12);
+}
+html[data-theme="light"]{
+  --bg:#F0EEE8;--bg-soft:#FFF;--surface:#FFF;--surface-2:#F4F2EA;
+  --border:#E0DDD4;--border-soft:#E8E6DC;--text:#15161A;--text-dim:#5C5F68;--text-faint:#8B8E97;
+  --accent:#B9711A;--accent-strong:#96590F;--accent-soft:rgba(185,113,26,.10);
+  --good:#188A5E;--good-soft:rgba(24,138,94,.10);
+  --bad:#C0392B;--bad-soft:rgba(192,57,43,.10);
+  --blue:#2460D6;--blue-soft:rgba(36,96,214,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:-.01em;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,select,textarea{font-family:inherit;}
+a{color:inherit;text-decoration:none;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:55px;border-bottom:1px solid var(--border-soft);background:var(--bg-soft);flex:none;}
+.brand{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk';font-weight:600;font-size:15px;}
+.brand-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(155deg,var(--accent-strong),var(--accent));position:relative;flex:none;}
+.brand-mark::after{content:"";position:absolute;inset:5px;border-radius:3px;background:var(--bg-soft);clip-path:polygon(0 0,100% 0,100% 45%,45% 45%,45% 100%,0 100%);}
+.admin-badge{font-size:10.5px;background:var(--bad-soft);color:var(--bad);padding:2px 8px;border-radius:99px;font-family:'JetBrains Mono';}
+.theme-switch{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:2px;gap:1px;}
+.theme-switch button{padding:5px 7px;border-radius:99px;font-size:11px;color:var(--text-faint);}
+.theme-switch button.active{background:var(--surface-2);color:var(--text);}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden;}
+.sidebar{width:210px;flex:none;border-right:1px solid var(--border-soft);background:var(--bg-soft);overflow-y:auto;}
+.sidebar-grp{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-faint);padding:14px 14px 6px;}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:13px;color:var(--text-dim);cursor:pointer;transition:background .15s,color .15s;}
+.sidebar-item:hover{background:var(--surface-2);color:var(--text);}
+.sidebar-item.active{background:var(--accent-soft);color:var(--accent);}
+.sidebar-item .icon{width:18px;text-align:center;flex:none;}
+.content{flex:1;overflow-y:auto;padding:24px;}
+
+/* PANELS */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* STATS GRID */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.sc .lbl{font-size:11.5px;color:var(--text-faint);margin-bottom:5px;}
+.sc .val{font-family:'Space Grotesk';font-size:24px;font-weight:600;}
+.sc .chg{font-size:11px;margin-top:3px;}
+.chg.up{color:var(--good);}
+.chg.down{color:var(--bad);}
+.sc.accent-c{background:var(--accent-soft);border-color:transparent;}
+.sc.accent-c .val{color:var(--accent);}
+
+/* TABLES */
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.tbl-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border-soft);}
+.tbl-head h4{font-size:14px;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;padding:10px 14px;border-bottom:1px solid var(--border-soft);}
+td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border-soft);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface-2);}
+.status{font-size:11px;padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono';}
+.status.active{background:var(--good-soft);color:var(--good);}
+.status.pending{background:var(--accent-soft);color:var(--accent);}
+.status.suspended{background:var(--bad-soft);color:var(--bad);}
+.status.external{background:rgba(139,144,160,.13);color:#8B90A0;}
+.plan-tag{font-size:11px;padding:3px 8px;border-radius:99px;background:var(--surface-2);font-family:'JetBrains Mono';}
+.action-btn{font-size:11.5px;padding:5px 10px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);cursor:pointer;margin-right:4px;}
+.action-btn:hover{border-color:var(--text-faint);}
+.action-btn.danger{color:var(--bad);}
+.action-btn.danger:hover{background:var(--bad-soft);border-color:var(--bad);}
+.action-btn.success{color:var(--good);}
+.action-btn.success:hover{background:var(--good-soft);border-color:var(--good);}
+
+/* FORMS */
+.form-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;}
+.form-section h4{font-size:14px;margin-bottom:16px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:6px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-size:13px;outline:none;transition:border-color .2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
+.form-group select option{background:var(--surface);}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:99px;font-weight:600;font-size:13px;cursor:pointer;transition:opacity .18s;}
+.btn-primary{background:linear-gradient(155deg,var(--accent-strong),var(--accent) 70%);color:#181206;}
+.btn-ghost{background:var(--surface-2);border:1px solid var(--border);color:var(--text);}
+.btn-danger{background:var(--bad-soft);border:1px solid var(--bad);color:var(--bad);}
+.btn:hover{opacity:.88;}
+
+/* TOGGLE */
+.toggle{width:38px;height:21px;border-radius:99px;background:var(--surface-2);border:1.5px solid var(--border);position:relative;cursor:pointer;transition:background .2s;flex:none;}
+.toggle.on{background:var(--good);border-color:var(--good);}
+.toggle::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform .2s;}
+.toggle.on::after{transform:translateX(17px);}
+
+/* CHART BARS */
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px;padding:0 4px;}
+.bar{flex:1;background:var(--accent-soft);border-radius:5px 5px 0 0;min-width:20px;transition:background .2s;}
+.bar:hover{background:var(--accent);}
+.bar-labels{display:flex;gap:8px;padding:6px 4px 0;}
+.bar-labels span{flex:1;font-size:10px;color:var(--text-faint);text-align:center;min-width:20px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);box-shadow:0 12px 40px rgba(0,0,0,.4);padding:12px 18px;border-radius:12px;font-size:13px;z-index:99;opacity:0;pointer-events:none;transition:all .25s var(--ease);display:flex;align-items:center;gap:10px;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast .dot{width:7px;height:7px;border-radius:50%;background:var(--good);flex:none;}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .22s;}
+.modal-ov.show{opacity:1;pointer-events:auto;}
+.modal{background:var(--bg-soft);border:1px solid var(--border);border-radius:18px;width:440px;max-width:100%;padding:26px;}
+.modal h3{font-size:17px;margin-bottom:18px;}
+.modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+@media(max-width:760px){.stat-row{grid-template-columns:1fr 1fr;}.form-grid{grid-template-columns:1fr;}.sidebar{display:none;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <a href="index.html" class="brand"><div class="brand-mark"></div>Biswarup AI</a>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="theme-switch" id="themeSwitch">
+      <button data-mode="light">☀</button><button data-mode="dark">☾</button><button data-mode="system">⧉</button>
+    </div>
+    <a href="index.html" style="font-size:13px;color:var(--text-dim);">← View Site</a>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-grp">Overview</div>
+    <div class="sidebar-item active" data-panel="overview"><span class="icon">◆</span>Dashboard</div>
+    <div class="sidebar-grp">Management</div>
+    <div class="sidebar-item" data-panel="users"><span class="icon">👤</span>Users</div>
+    <div class="sidebar-item" data-panel="tools"><span class="icon">🔧</span>AI Tools</div>
+    <div class="sidebar-item" data-panel="models"><span class="icon">◈</span>Models</div>
+    <div class="sidebar-item" data-panel="plans"><span class="icon">💎</span>Plans</div>
+    <div class="sidebar-item" data-panel="payments"><span class="icon">💳</span>Payments</div>
+    <div class="sidebar-grp">Config</div>
+    <div class="sidebar-item" data-panel="upi"><span class="icon">📱</span>UPI Settings</div>
+    <div class="sidebar-item" data-panel="analytics"><span class="icon">📊</span>Analytics</div>
+    <div class="sidebar-item" data-panel="settings"><span class="icon">⚙</span>Settings</div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="panel active" id="p-overview">
+      <h2 style="margin-bottom:20px;">Dashboard</h2>
+      <div class="stat-row">
+        <div class="sc accent-c"><div class="lbl">Total Users</div><div class="val">142</div><div class="chg up">+12 this week</div></div>
+        <div class="sc"><div class="lbl">Paid Users</div><div class="val">18</div><div class="chg up">+3 this week</div></div>
+        <div class="sc"><div class="lbl">Pending Payments</div><div class="val">4</div><div class="chg down">Needs review</div></div>
+        <div class="sc"><div class="lbl">AI Requests (30d)</div><div class="val">3,842</div><div class="chg up">+8%</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="tbl-wrap">
+          <div class="tbl-head"><h4>Recent Sign-ups</h4></div>
+          <table>
+            <thead><tr><th>Name</th><th>Plan</th><th>Date</th></tr></thead>
+            <tbody>
+              <tr><td>Aniket Roy</td><td><span class="plan-tag">Free</span></td><td style="color:var(--text-faint)">Today</td></tr>
+              <tr><td>Priya Das</td><td><span class="plan-tag">AI Pro</span></td><td style="color:var(--text-faint)">Yesterday</td></tr>
+              <tr><td>Sourav Nath</td><td><span class="plan-tag">Free</span></td><td style="color:var(--text-faint)">2d ago</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-wrap">
+          <div class="tbl-head"><h4>Daily AI Requests (7d)</h4></div>
+          <div style="padding:16px;">
+            <div class="bar-chart">
+              <div class="bar" style="height:40%"></div>
+              <div class="bar" style="height:60%"></div>
+              <div class="bar" style="height:55%"></div>
+              <div class="bar" style="height:80%"></div>
+              <div class="bar" style="height:70%"></div>
+              <div class="bar" style="height:90%"></div>
+              <div class="bar" style="height:75%"></div>
+            </div>
+            <div class="bar-labels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="panel" id="p-users">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <h2>Users</h2>
+        <input placeholder="Search users…" style="background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 13px;color:var(--text);outline:none;font-size:13px;width:220px;">
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Status</th><th>Credits</th><th>Actions</th></tr></thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI TOOLS -->
+    <div class="panel" id="p-tools">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <h2>AI Tools</h2>
+        <button class="btn btn-primary" onclick="openAddTool()">+ Add Tool</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Category</th><th>Provider</th><th>Status</th><th>Integration</th><th>Enabled</th><th>Actions</th></tr></thead>
+          <tbody id="toolTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MODELS -->
+    <div class="panel" id="p-models">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <h2>AI Models</h2>
+        <button class="btn btn-primary" onclick="toast('Add model — Phase 4 backend integration.')">+ Add Model</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Model</th><th>Provider</th><th>Credits/req</th><th>Plans</th><th>Status</th><th>Enabled</th></tr></thead>
+          <tbody>
+            <tr><td class="mono" style="font-size:12px;">biswarup-chat-v1</td><td>Internal</td><td>1c</td><td><span class="plan-tag">All</span></td><td><span class="status active">Active</span></td><td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td></tr>
+            <tr><td class="mono" style="font-size:12px;">smart-writer-v1</td><td>Internal</td><td>2c</td><td><span class="plan-tag">All</span></td><td><span class="status active">Active</span></td><td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td></tr>
+            <tr><td class="mono" style="font-size:12px;">image-studio-beta</td><td>Internal</td><td>5c</td><td><span class="plan-tag">Pro+</span></td><td><span class="status pending">Beta</span></td><td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td></tr>
+            <tr><td class="mono" style="font-size:12px;">pro-reasoner-v1</td><td>API (pending)</td><td>8c</td><td><span class="plan-tag">Pro</span></td><td><span class="status external">Coming Soon</span></td><td><div class="toggle" onclick="this.classList.toggle('on')"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PLANS -->
+    <div class="panel" id="p-plans">
+      <h2 style="margin-bottom:18px;">Plans & Pricing</h2>
+      <div class="form-section">
+        <h4>Free Plan</h4>
+        <div class="form-grid">
+          <div class="form-group"><label>Monthly Credits</label><input value="50" type="number"></div>
+          <div class="form-group"><label>History Retention (days)</label><input value="7" type="number"></div>
+        </div>
+        <button class="btn btn-primary" onclick="toast('Free plan settings saved.')">Save</button>
+      </div>
+      <div class="form-section">
+        <h4>AI Pro</h4>
+        <div class="form-grid">
+          <div class="form-group"><label>Monthly Price (₹)</label><input value="499" type="number"></div>
+          <div class="form-group"><label>Yearly Price (₹)</label><input value="4999" type="number"></div>
+          <div class="form-group"><label>Monthly Credits</label><input value="500" type="number"></div>
+          <div class="form-group"><label>History Retention (days)</label><input value="90" type="number"></div>
+        </div>
+        <button class="btn btn-primary" onclick="toast('AI Pro settings saved.')">Save</button>
+      </div>
+      <div class="form-section">
+        <h4>AI Pro Max</h4>
+        <div class="form-grid">
+          <div class="form-group"><label>Monthly Price (₹)</label><input value="999" type="number"></div>
+          <div class="form-group"><label>Yearly Price (₹)</label><input value="9999" type="number"></div>
+          <div class="form-group"><label>Monthly Credits</label><input value="2000" type="number"></div>
+          <div class="form-group"><label>History Retention (days)</label><input value="365" type="number"></div>
+        </div>
+        <button class="btn btn-primary" onclick="toast('AI Pro Max settings saved.')">Save</button>
+      </div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div class="panel" id="p-payments">
+      <h2 style="margin-bottom:18px;">Payments</h2>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="btn btn-ghost active-filter" onclick="filterPay(this,'all')">All</button>
+        <button class="btn btn-ghost" onclick="filterPay(this,'pending')">Pending</button>
+        <button class="btn btn-ghost" onclick="filterPay(this,'approved')">Approved</button>
+        <button class="btn btn-ghost" onclick="filterPay(this,'rejected')">Rejected</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>User</th><th>Plan</th><th>Amount</th><th>Txn ID</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="payTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- UPI SETTINGS -->
+    <div class="panel" id="p-upi">
+      <h2 style="margin-bottom:18px;">UPI Settings</h2>
+      <div class="form-section">
+        <h4>Payment Configuration</h4>
+        <div class="form-group"><label>UPI ID</label><input id="upiId" value="" placeholder="Enter your UPI ID" type="password" autocomplete="off"><small style="font-size:11px;color:var(--text-faint);display:block;margin-top:5px;">UPI ID is stored securely on the server and never exposed in frontend code. Toggle visibility below.</small></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;">
+          <button class="action-btn" onclick="toggleUpiVis()">Toggle visibility</button>
+          <span style="font-size:12px;color:var(--text-faint);" id="upiStatus">Hidden</span>
+        </div>
+        <div class="form-group"><label>Payment Instructions (shown to users)</label><textarea rows="4" style="resize:vertical;">1. Scan the QR code with any UPI app.
+2. Pay the amount shown for your selected plan.
+3. Copy the transaction / reference ID.
+4. Paste it in the form and submit.
+5. Your plan activates after admin verification.</textarea></div>
+        <div class="form-group"><label>QR Code Image</label><input type="file" accept="image/*" style="padding:8px;"><small style="font-size:11px;color:var(--text-faint);display:block;margin-top:4px;">Upload your UPI QR code. It will be displayed in the payment modal — UPI ID text is cropped/hidden automatically.</small></div>
+        <button class="btn btn-primary" onclick="toast('UPI settings saved securely.')">Save UPI Settings</button>
+      </div>
+      <div class="form-section">
+        <h4>Verification Workflow</h4>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;">
+          <div><h5 style="font-size:13.5px;">Auto-send confirmation email</h5><p style="font-size:12px;color:var(--text-faint);">When admin approves a payment</p></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;">
+          <div><h5 style="font-size:13.5px;">Require transaction ID</h5><p style="font-size:12px;color:var(--text-faint);">Block submission without txn ID</p></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="panel" id="p-analytics">
+      <h2 style="margin-bottom:18px;">Analytics</h2>
+      <div class="stat-row">
+        <div class="sc"><div class="lbl">Monthly Active Users</div><div class="val">89</div></div>
+        <div class="sc accent-c"><div class="lbl">Monthly Revenue</div><div class="val">₹8,982</div></div>
+        <div class="sc"><div class="lbl">Avg Credits/User</div><div class="val">27</div></div>
+        <div class="sc"><div class="lbl">Conversion Rate</div><div class="val">12.7%</div></div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-head"><h4>Top AI Tools (by usage)</h4></div>
+        <table>
+          <thead><tr><th>Tool</th><th>Requests</th><th>Credits Used</th><th>Users</th></tr></thead>
+          <tbody>
+            <tr><td>AI Chat</td><td>1,842</td><td>1,842c</td><td>76</td></tr>
+            <tr><td>Smart Writer</td><td>694</td><td>1,388c</td><td>41</td></tr>
+            <tr><td>Coding</td><td>487</td><td>974c</td><td>29</td></tr>
+            <tr><td>Image Studio</td><td>210</td><td>1,050c</td><td>18</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SITE SETTINGS -->
+    <div class="panel" id="p-settings">
+      <h2 style="margin-bottom:18px;">Site Settings</h2>
+      <div class="form-section">
+        <h4>General</h4>
+        <div class="form-group"><label>Site Name</label><input value="Biswarup AI Tools"></div>
+        <div class="form-group"><label>Tagline</label><input value="One Workspace. Limitless AI."></div>
+        <div class="form-group"><label>Contact Email</label><input value="biswarup@example.com" type="email"></div>
+        <div class="form-group"><label>YouTube URL</label><input value="https://youtube.com/@biswarupwithai"></div>
+        <div class="form-group"><label>Instagram URL</label><input value="https://www.instagram.com/biswarup.ai"></div>
+        <div class="form-group"><label>Facebook URL</label><input value="https://www.facebook.com/share/1DVM6Xpqto/"></div>
+        <button class="btn btn-primary" onclick="toast('Site settings saved.')">Save Settings</button>
+      </div>
+      <div class="form-section">
+        <h4>Feature Flags</h4>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+          <div><h5 style="font-size:13.5px;">Maintenance Mode</h5><p style="font-size:12px;color:var(--text-faint);">Shows a maintenance banner to all visitors</p></div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+          <div><h5 style="font-size:13.5px;">New User Registrations</h5><p style="font-size:12px;color:var(--text-faint);">Allow new accounts to be created</p></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;">
+          <div><h5 style="font-size:13.5px;">Newsletter Subscriptions</h5><p style="font-size:12px;color:var(--text-faint);">Accept new email subscribers</p></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Add Tool Modal -->
+<div class="modal-ov" id="addToolModal">
+  <div class="modal">
+    <h3>Add AI Tool</h3>
+    <div class="form-group"><label>Tool Name</label><input id="nt-name" placeholder="e.g. ChatGPT"></div>
+    <div class="form-group"><label>Category</label>
+      <select id="nt-cat"><option>AI Chat</option><option>AI Image</option><option>AI Video</option><option>AI Writing</option><option>AI Coding</option><option>AI Research</option><option>AI Music</option><option>AI Voice</option><option>AI Presentation</option><option>AI Productivity</option></select>
+    </div>
+    <div class="form-group"><label>Provider</label><input id="nt-prov" placeholder="e.g. OpenAI"></div>
+    <div class="form-group"><label>Integration Type</label>
+      <select id="nt-int"><option>EXTERNAL</option><option>API</option><option>SDK</option><option>COMING_SOON</option></select>
+    </div>
+    <div class="form-group"><label>Short Description</label><input id="nt-desc" placeholder="One-line description"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeAddTool()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTool()">Add Tool</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
+
+<script>
+/* theme */
+const root=document.documentElement;let themeMode='system';const mq=window.matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(){const r=themeMode==='system'?(mq.matches?'dark':'light'):themeMode;root.setAttribute('data-theme',r);document.querySelectorAll('#themeSwitch button').forEach(b=>b.classList.toggle('active',b.dataset.mode===themeMode));}
+document.querySelectorAll('#themeSwitch button').forEach(b=>b.addEventListener('click',()=>{themeMode=b.dataset.mode;applyTheme();}));
+mq.addEventListener('change',()=>{if(themeMode==='system')applyTheme();});applyTheme();
+
+/* toast */
+let tT;function toast(msg){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),3000);}
+
+/* panels */
+document.querySelectorAll('.sidebar-item[data-panel]').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('p-'+el.dataset.panel).classList.add('active');
+  });
+});
+
+/* users */
+const users=[
+  {name:'Biswarup Patra',email:'biswarup@email.com',plan:'Admin',status:'active',credits:'∞'},
+  {name:'Aniket Roy',email:'aniket@email.com',plan:'Free',status:'active',credits:'42/50'},
+  {name:'Priya Das',email:'priya@email.com',plan:'AI Pro',status:'active',credits:'388/500'},
+  {name:'Sourav Nath',email:'sourav@email.com',plan:'Free',status:'suspended',credits:'0/50'},
+  {name:'Riya Sen',email:'riya@email.com',plan:'AI Pro Max',status:'active',credits:'1200/2000'},
+];
+document.getElementById('userTableBody').innerHTML=users.map(u=>`<tr>
+  <td>${u.name}</td><td style="color:var(--text-faint)">${u.email}</td>
+  <td><span class="plan-tag">${u.plan}</span></td>
+  <td><span class="status ${u.status}">${u.status}</span></td>
+  <td class="mono" style="font-size:12px;">${u.credits}</td>
+  <td><button class="action-btn" onclick="toast('Edit user — Phase 2 backend.')">Edit</button><button class="action-btn danger" onclick="toast('User ${u.name} suspended.')">Suspend</button></td>
+</tr>`).join('');
+
+/* tools table */
+const adminTools=[
+  {name:'AI Chat',cat:'AI Chat',prov:'Internal',status:'available',int:'Internal',enabled:true},
+  {name:'ChatGPT',cat:'AI Chat',prov:'OpenAI',status:'external',int:'EXTERNAL',enabled:true},
+  {name:'Meta AI',cat:'AI Chat',prov:'Meta',status:'external',int:'EXTERNAL',enabled:true},
+  {name:'Qwen',cat:'AI Chat',prov:'Alibaba',status:'external',int:'EXTERNAL',enabled:true},
+  {name:'Midjourney',cat:'AI Image',prov:'Midjourney',status:'external',int:'EXTERNAL',enabled:true},
+  {name:'ElevenLabs',cat:'AI Voice',prov:'ElevenLabs',status:'external',int:'EXTERNAL',enabled:true},
+  {name:'Flow',cat:'AI Video',prov:'Google',status:'external',int:'EXTERNAL',enabled:false},
+];
+document.getElementById('toolTableBody').innerHTML=adminTools.map(t=>`<tr>
+  <td>${t.name}</td><td style="color:var(--text-faint)">${t.cat}</td><td style="color:var(--text-faint)">${t.prov}</td>
+  <td><span class="status ${t.status==='available'?'active':t.status==='external'?'external':'pending'}">${t.status}</span></td>
+  <td class="mono" style="font-size:11px;">${t.int}</td>
+  <td><div class="toggle ${t.enabled?'on':''}" onclick="this.classList.toggle('on')"></div></td>
+  <td><button class="action-btn" onclick="toast('Edit tool form — Phase 2.')">Edit</button><button class="action-btn danger" onclick="toast('Tool removed.')">Delete</button></td>
+</tr>`).join('');
+
+/* payments */
+const payments=[
+  {user:'Priya Das',plan:'AI Pro',amount:'₹499',txn:'YBL2409281',date:'Today',status:'pending'},
+  {user:'Riya Sen',plan:'AI Pro Max',amount:'₹9999',txn:'GPY2409271',date:'Yesterday',status:'approved'},
+  {user:'Rahul Kumar',plan:'AI Pro',amount:'₹499',txn:'PAYTM22381',date:'3d ago',status:'rejected'},
+  {user:'Ankit Sharma',plan:'AI Pro',amount:'₹4999',txn:'GPAY00921',date:'5d ago',status:'approved'},
+];
+function renderPayments(filter='all'){
+  const filtered=payments.filter(p=>filter==='all'||p.status===filter);
+  document.getElementById('payTableBody').innerHTML=filtered.map(p=>`<tr>
+    <td>${p.user}</td><td><span class="plan-tag">${p.plan}</span></td><td class="mono">${p.amount}</td>
+    <td class="mono" style="font-size:11px;">${p.txn}</td><td style="color:var(--text-faint)">${p.date}</td>
+    <td><span class="status ${p.status}">${p.status}</span></td>
+    <td>${p.status==='pending'?`<button class="action-btn success" onclick="toast('Payment approved. Subscription activated.')">Approve</button><button class="action-btn danger" onclick="toast('Payment rejected.')">Reject</button>`:'—'}</td>
+  </tr>`).join('')||`<tr><td colspan="7" style="text-align:center;color:var(--text-faint);padding:20px;">No payments in this filter.</td></tr>`;
+}
+renderPayments();
+function filterPay(btn,f){document.querySelectorAll('.panel #p-payments .btn').forEach(b=>b.style.background='');btn.style.background='var(--accent-soft)';renderPayments(f);}
+
+/* add tool modal */
+function openAddTool(){document.getElementById('addToolModal').classList.add('show');}
+function closeAddTool(){document.getElementById('addToolModal').classList.remove('show');}
+document.getElementById('addToolModal').addEventListener('click',e=>{if(e.target===document.getElementById('addToolModal'))closeAddTool();});
+function saveTool(){const n=document.getElementById('nt-name').value.trim();if(!n){toast('Enter a tool name.');return;}closeAddTool();toast(`"${n}" added to the directory.`);}
+
+/* UPI visibility */
+function toggleUpiVis(){const i=document.getElementById('upiId');const s=document.getElementById('upiStatus');const hidden=i.type==='password';i.type=hidden?'text':'password';s.textContent=hidden?'Visible':'Hidden';}
+</script>
+</body>
+</html>
