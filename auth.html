@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Biswarup AI Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{--radius-m:16px;--radius-l:22px;--ease:cubic-bezier(.16,1,.3,1);}
+  html[data-theme="dark"]{
+    --bg:#0B0C10;--bg-soft:#111319;--surface:#181B22;--surface-2:#20242D;
+    --border:#282C36;--border-soft:#20232B;--text:#F3F2EE;--text-dim:#9A9DA8;--text-faint:#5C606C;
+    --accent:#F0B25B;--accent-strong:#FFC97A;--accent-soft:rgba(240,178,91,.13);
+    --good:#5FD3A5;--good-soft:rgba(95,211,165,.13);
+  }
+  html[data-theme="light"]{
+    --bg:#F7F6F2;--bg-soft:#FFF;--surface:#FFF;--surface-2:#F1EFE8;
+    --border:#E4E1D6;--border-soft:#ECEAE0;--text:#15161A;--text-dim:#5C5F68;--text-faint:#8B8E97;
+    --accent:#B9711A;--accent-strong:#96590F;--accent-soft:rgba(185,113,26,.10);
+    --good:#188A5E;--good-soft:rgba(24,138,94,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;font-weight:600;letter-spacing:-.01em;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  input{font-family:inherit;}
+
+  nav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:66px;border-bottom:1px solid var(--border-soft);background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(14px);}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Space Grotesk';font-weight:600;font-size:16px;}
+  .brand-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(155deg,var(--accent-strong),var(--accent) 65%);position:relative;flex:none;}
+  .brand-mark::after{content:"";position:absolute;inset:6px;border-radius:4px;background:var(--bg);clip-path:polygon(0 0,100% 0,100% 45%,45% 45%,45% 100%,0 100%);}
+  .theme-switch{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:3px;gap:2px;}
+  .theme-switch button{padding:5px 8px;border-radius:99px;font-size:12px;color:var(--text-faint);}
+  .theme-switch button.active{background:var(--surface-2);color:var(--text);}
+
+  main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;position:relative;overflow:hidden;}
+  .glow{position:absolute;width:500px;height:500px;background:radial-gradient(circle,var(--accent) 0%,transparent 70%);opacity:.08;filter:blur(60px);pointer-events:none;}
+
+  .auth-card{width:100%;max-width:430px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);padding:36px;position:relative;z-index:1;}
+  .auth-tabs{display:flex;background:var(--surface-2);border-radius:10px;padding:3px;margin-bottom:28px;}
+  .auth-tab{flex:1;padding:9px;border-radius:8px;font-size:14px;font-weight:600;text-align:center;color:var(--text-dim);transition:background .2s,color .2s;}
+  .auth-tab.active{background:var(--surface);color:var(--text);}
+
+  .form-group{margin-bottom:16px;}
+  .form-group label{display:block;font-size:12.5px;color:var(--text-dim);margin-bottom:7px;font-weight:500;}
+  .form-group input{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s;}
+  .form-group input:focus{border-color:var(--accent);}
+  .form-group input::placeholder{color:var(--text-faint);}
+  .pw-wrap{position:relative;}
+  .pw-toggle{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:13px;}
+  .pw-toggle:hover{color:var(--text);}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:99px;font-weight:600;font-size:14px;width:100%;transition:opacity .18s;}
+  .btn:active{opacity:.85;}
+  .btn-primary{background:linear-gradient(155deg,var(--accent-strong),var(--accent) 70%);color:#181206;}
+  .btn-ghost{background:var(--surface-2);border:1px solid var(--border);color:var(--text);}
+  .btn-google{background:var(--surface-2);border:1px solid var(--border);color:var(--text);gap:10px;}
+
+  .divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--text-faint);font-size:12px;}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border-soft);}
+
+  .forgot{text-align:right;margin-top:-8px;margin-bottom:14px;}
+  .forgot a{font-size:12.5px;color:var(--accent);}
+  .terms{font-size:11.5px;color:var(--text-faint);text-align:center;margin-top:14px;}
+  .terms a{color:var(--accent);}
+
+  .strength{height:3px;border-radius:99px;background:var(--surface-2);margin-top:6px;overflow:hidden;}
+  .strength-bar{height:100%;border-radius:99px;transition:width .3s,background .3s;}
+
+  .check-row{display:flex;align-items:center;gap:9px;margin-bottom:14px;}
+  .check-box{width:17px;height:17px;border-radius:5px;border:1.5px solid var(--border);background:var(--surface-2);flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .check-box.checked{background:var(--accent);border-color:var(--accent);color:#181206;}
+  .check-label{font-size:12.5px;color:var(--text-dim);}
+
+  /* forgot pw panel */
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-dim);margin-bottom:22px;}
+  .back-link:hover{color:var(--text);}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);box-shadow:0 12px 40px rgba(0,0,0,.35);padding:13px 20px;border-radius:12px;font-size:13.5px;z-index:99;opacity:0;pointer-events:none;transition:all .25s var(--ease);display:flex;align-items:center;gap:10px;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast .dot{width:7px;height:7px;border-radius:50%;background:var(--good);flex:none;}
+
+  @media(max-width:480px){.auth-card{padding:26px 20px;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="brand"><div class="brand-mark"></div>Biswarup AI</a>
+  <div class="theme-switch" id="themeSwitch">
+    <button data-mode="light">☀</button>
+    <button data-mode="dark">☾</button>
+    <button data-mode="system">⧉</button>
+  </div>
+</nav>
+
+<main>
+  <div class="glow"></div>
+
+  <!-- Main auth card -->
+  <div class="auth-card" id="authCard">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="panel active" id="loginPanel">
+      <h2 style="font-size:21px;margin-bottom:6px;">Welcome back</h2>
+      <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:22px;">Sign in to your AI workspace.</p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password">
+          <button class="pw-toggle" onclick="togglePw('loginPw',this)">Show</button>
+        </div>
+      </div>
+      <div class="forgot"><a href="#" onclick="showForgot()">Forgot password?</a></div>
+      <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
+      <div class="divider">or</div>
+      <button class="btn btn-google">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+      <p class="terms">By signing in you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="panel" id="registerPanel">
+      <h2 style="font-size:21px;margin-bottom:6px;">Create your account</h2>
+      <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:22px;">Access every AI tool from one workspace.</p>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="Your name" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="regPw" placeholder="Min 8 characters" autocomplete="new-password" oninput="checkStrength(this)">
+          <button class="pw-toggle" onclick="togglePw('regPw',this)">Show</button>
+        </div>
+        <div class="strength"><div class="strength-bar" id="strengthBar" style="width:0%;background:var(--text-faint);"></div></div>
+      </div>
+      <div class="check-row">
+        <div class="check-box" id="terms-box" onclick="toggleCheck(this)"></div>
+        <span class="check-label">I agree to the <a href="#" style="color:var(--accent)">Terms of Service</a> and <a href="#" style="color:var(--accent)">Privacy Policy</a></span>
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()">Create Account</button>
+      <div class="divider">or</div>
+      <button class="btn btn-google">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div class="panel" id="forgotPanel">
+      <button class="back-link" onclick="hideForgot()">← Back to sign in</button>
+      <h2 style="font-size:21px;margin-bottom:6px;">Reset password</h2>
+      <p style="color:var(--text-dim);font-size:13.5px;margin-bottom:22px;">Enter your email and we'll send a reset link.</p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="forgotEmail" placeholder="you@email.com">
+      </div>
+      <button class="btn btn-primary" onclick="doForgot()">Send Reset Link</button>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
+
+<script>
+/* theme */
+const root=document.documentElement;
+let themeMode='system';
+const mq=window.matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(){const r=themeMode==='system'?(mq.matches?'dark':'light'):themeMode;root.setAttribute('data-theme',r);document.querySelectorAll('#themeSwitch button').forEach(b=>b.classList.toggle('active',b.dataset.mode===themeMode));}
+document.querySelectorAll('#themeSwitch button').forEach(b=>b.addEventListener('click',()=>{themeMode=b.dataset.mode;applyTheme();}));
+mq.addEventListener('change',()=>{if(themeMode==='system')applyTheme();});
+applyTheme();
+
+/* toast */
+let tTimer;
+function toast(msg,good=true){const t=document.getElementById('toast');t.querySelector('.dot').style.background=good?'var(--good)':'#e55';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(tTimer);tTimer=setTimeout(()=>t.classList.remove('show'),3200);}
+
+/* tabs */
+function switchTab(tab){
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+  document.getElementById(tab+'Panel').classList.add('active');
+}
+
+/* forgot pw */
+function showForgot(){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('forgotPanel').classList.add('active');}
+function hideForgot(){switchTab('login');}
+
+/* pw toggle */
+function togglePw(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'Show':'Hide';}
+
+/* strength */
+function checkStrength(input){
+  const v=input.value;let score=0;
+  if(v.length>=8)score++;if(/[A-Z]/.test(v))score++;if(/[0-9]/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;
+  const bar=document.getElementById('strengthBar');
+  const colours=['#e55','#f0b25b','#5fd3a5','#5fd3a5'];
+  const widths=['25%','50%','75%','100%'];
+  bar.style.width=v.length?widths[score-1]||'0%':'0%';
+  bar.style.background=colours[score-1]||'var(--text-faint)';
+}
+
+/* check box */
+function toggleCheck(el){el.classList.toggle('checked');el.textContent=el.classList.contains('checked')?'✓':'';}
+
+/* validate */
+function validate(email,pw,name='ok'){
+  if(!email||!email.includes('@')){toast('Enter a valid email address.',false);return false;}
+  if(!pw||pw.length<8){toast('Password must be at least 8 characters.',false);return false;}
+  if(name!=='ok'&&!name.trim()){toast('Enter your name.',false);return false;}
+  return true;
+}
+
+/* actions (stub - real backend integration in Phase 2) */
+function doLogin(){
+  const e=document.getElementById('loginEmail').value.trim();
+  const p=document.getElementById('loginPw').value;
+  if(!validate(e,p))return;
+  toast('Signing you in… (backend integration coming in Phase 2)');
+  setTimeout(()=>window.location.href='workspace.html',1600);
+}
+function doRegister(){
+  const n=document.getElementById('regName').value;
+  const e=document.getElementById('regEmail').value.trim();
+  const p=document.getElementById('regPw').value;
+  if(!validate(e,p,n))return;
+  if(!document.getElementById('terms-box').classList.contains('checked')){toast('Accept the terms to continue.',false);return;}
+  toast('Account created — welcome! Redirecting to workspace…');
+  setTimeout(()=>window.location.href='workspace.html',1800);
+}
+function doForgot(){
+  const e=document.getElementById('forgotEmail').value.trim();
+  if(!e||!e.includes('@')){toast('Enter a valid email.',false);return;}
+  toast('Reset link sent — check your inbox.');
+}
+</script>
+</body>
+</html>
